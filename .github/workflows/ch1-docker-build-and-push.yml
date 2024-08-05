@@ -2,8 +2,10 @@ name: Build and Push Docker Image
 
 on:
   push:
+    branches:
+      - main
     paths:
-      - 'old_roman_empire_quiz/**'
+      - 'ch1/old_roman_empire_quiz/**'
       
 jobs:
   build:

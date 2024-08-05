@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import patch, MagicMock
 import random
+import pygame
 
 # Importing the game logic functions from the file
 from game_logic import main_game, questions

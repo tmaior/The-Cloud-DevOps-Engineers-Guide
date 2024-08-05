@@ -7,7 +7,7 @@ def congratulations_screen():
     while True:
         screen.fill(BG_COLOR)
         
-        draw_text('Congratulations!', TITLE_FONT, FONT_COLOR, screen, WIDTH // 2, HEIGHT // 3, WIDTH, 20, center=True)
+        draw_text('Congratulations!:D', TITLE_FONT, FONT_COLOR, screen, WIDTH // 2, HEIGHT // 3, WIDTH, 20, center=True)
         
         draw_text('Press Enter to Retry', RETRY_PROMPT_FONT, FONT_COLOR, screen, WIDTH // 2, HEIGHT // 2 + 50, WIDTH, 20, center=True)
         draw_text('Or press ESC to Quit', RETRY_PROMPT_FONT, FONT_COLOR, screen, WIDTH // 2, HEIGHT // 2 + 100, WIDTH, 20, center=True)

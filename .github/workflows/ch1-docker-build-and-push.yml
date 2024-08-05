@@ -26,8 +26,8 @@ jobs:
 
     - name: Build Docker image
       run: |
-        docker build -t vikafernanda/old-roman-empire-quiz:latest .
+        docker build -t vikafernanda/roman-empire-quiz:latest .
         
     - name: Push Docker image
       run: |
-        docker push vikafernanda/old-roman-empire-quiz:latest
+        docker push vikafernanda/roman-empire-quiz:latest

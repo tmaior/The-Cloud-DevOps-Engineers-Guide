@@ -4,7 +4,7 @@ import random
 import pygame
 
 # Importing the game logic functions from the file
-from game_logic import main_game, questions
+from old_roman_empire_quiz.game_logic import main_game, questions
 
 class TestRomanEmpireQuiz(unittest.TestCase):
 

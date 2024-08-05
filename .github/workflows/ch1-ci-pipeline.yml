@@ -26,6 +26,9 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r ch1/old-roman-empire-quiz/requirements.txt
 
+    - name: List files
+      run: ls -R
+
     - name: Run tests
       run: |
         python -m unittest discover -s ch1/old-roman-empire-quiz/tests

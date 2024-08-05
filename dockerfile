@@ -20,11 +20,11 @@ RUN apt-get update && \
     x11-xserver-utils \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+COPY ch1/old_roman_empire_quiz/requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY ch1/old_roman_empire_quiz/ .
 
 ENV DISPLAY=host.docker.interna1:0
 

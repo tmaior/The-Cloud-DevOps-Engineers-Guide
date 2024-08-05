@@ -16,6 +16,7 @@ class TestRomanEmpireQuiz(unittest.TestCase):
     @patch('pygame.event.get')
     @patch('game_logic.congratulations_screen', return_value=False)
     @patch('game_logic.game_over_screen', return_value=False)
+
     def test_correct_answer(self, mock_game_over_screen, mock_congratulations_screen, mock_event_get, mock_draw_border, mock_draw_text, mock_get_text_height, mock_font, mock_display_update):
         # Set up mock event sequence for answering correctly
         mock_event_get.side_effect = [
@@ -43,6 +44,7 @@ class TestRomanEmpireQuiz(unittest.TestCase):
     @patch('pygame.event.get')
     @patch('game_logic.congratulations_screen', return_value=False)
     @patch('game_logic.game_over_screen', return_value=False)
+
     def test_incorrect_answer(self, mock_game_over_screen, mock_congratulations_screen, mock_event_get, mock_draw_border, mock_draw_text, mock_get_text_height, mock_font, mock_display_update):
         # Set up mock event sequence for answering incorrectly
         mock_event_get.side_effect = [
@@ -70,6 +72,7 @@ class TestRomanEmpireQuiz(unittest.TestCase):
     @patch('pygame.event.get')
     @patch('game_logic.congratulations_screen', return_value=False)
     @patch('game_logic.game_over_screen', return_value=False)
+
     def test_mixed_answers(self, mock_game_over_screen, mock_congratulations_screen, mock_event_get, mock_draw_border, mock_draw_text, mock_get_text_height, mock_font, mock_display_update):
         # Set up mock event sequence for one correct and one incorrect answer
         mock_event_get.side_effect = [

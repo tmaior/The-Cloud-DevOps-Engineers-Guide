@@ -8,7 +8,7 @@ def game_over_screen():
         screen.fill(BG_COLOR)
         
         # Draw the game over message
-        draw_text('Game Over :-(', GAME_OVER_FONT, FONT_COLOR, screen, WIDTH // 2, HEIGHT // 3, WIDTH, 20, center=True)
+        draw_text('Game Over :(', GAME_OVER_FONT, FONT_COLOR, screen, WIDTH // 2, HEIGHT // 3, WIDTH, 20, center=True)
         
         # Draw the retry prompt
         draw_text('Press Enter to Retry', RETRY_PROMPT_FONT, FONT_COLOR, screen, WIDTH // 2, HEIGHT // 2 + 50, WIDTH, 20, center=True)

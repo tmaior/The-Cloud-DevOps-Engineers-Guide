@@ -38,7 +38,7 @@ jobs:
         ECR_REPOSITORY=old-roman-empire-quiz
         IMAGE_TAG=latest
         # Build the Docker image
-        docker build -t $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG -f ./Dockerfile ./ch1/old_roman_empire_quiz
+        docker build -t $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG -f ./Dockerfile
 
     - name: Push Docker image to Amazon ECR
       run: |

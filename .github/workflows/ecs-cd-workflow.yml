@@ -32,7 +32,7 @@ jobs:
     - name: Build Docker image
       run: |
         # Get the account ID and the region from the login response
-        ACCOUNT_ID=$(echo "${{ steps.ecr-login.outputs.registry }}" | cut -d'/' -f1)
+        ACCOUNT_ID=$(echo "${{ steps.ecr-login.outputs.registry }}" | cut -d'.' -f1)
         REGION=$(echo "${{ steps.ecr-login.outputs.registry }}" | cut -d'.' -f4)
         # Define the ECR repository and the image tag
         ECR_REPOSITORY=old-roman-empire-quiz
@@ -43,7 +43,7 @@ jobs:
     - name: Push Docker image to Amazon ECR
       run: |
         # Get the account ID and the region from the login response
-        ACCOUNT_ID=$(echo "${{ steps.ecr-login.outputs.registry }}" | cut -d'/' -f1)
+        ACCOUNT_ID=$(echo "${{ steps.ecr-login.outputs.registry }}" | cut -d'.' -f1)
         REGION=$(echo "${{ steps.ecr-login.outputs.registry }}" | cut -d'.' -f4)
         # Define the ECR repository and the image tag
         ECR_REPOSITORY=old-roman-empire-quiz
@@ -54,7 +54,7 @@ jobs:
     - name: Deploy to AWS ECS
       run: |
         # Get the account ID and the region from the login response
-        ACCOUNT_ID=$(echo "${{ steps.ecr-login.outputs.registry }}" | cut -d'/' -f1)
+        ACCOUNT_ID=$(echo "${{ steps.ecr-login.outputs.registry }}" | cut -d'.' -f1)
         REGION=$(echo "${{ steps.ecr-login.outputs.registry }}" | cut -d'.' -f4)
         # Define the ECR repository and the image tag
         ECR_REPOSITORY=old-roman-empire-quiz

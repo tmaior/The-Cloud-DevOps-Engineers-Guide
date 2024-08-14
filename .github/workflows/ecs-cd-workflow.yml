@@ -1,0 +1,65 @@
+name: CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'ch1/old_roman_empire_quiz/**'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-2
+
+    - name: Log in to Amazon ECR
+      id: ecr-login
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Build Docker image
+      run: |
+        # Get the account ID and the region from the login response
+        ACCOUNT_ID=$(echo "${{ steps.ecr-login.outputs.registry }}" | cut -d'/' -f1)
+        REGION=$(echo "${{ steps.ecr-login.outputs.registry }}" | cut -d'.' -f4)
+        # Define the ECR repository and the image tag
+        ECR_REPOSITORY=old-roman-empire-quiz
+        IMAGE_TAG=latest
+        # Build the Docker image
+        docker build -t $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG -f ch1/old_roman_empire_quiz/Dockerfile .
+
+    - name: Push Docker image to Amazon ECR
+      run: |
+        # Get the account ID and the region from the login response
+        ACCOUNT_ID=$(echo "${{ steps.ecr-login.outputs.registry }}" | cut -d'/' -f1)
+        REGION=$(echo "${{ steps.ecr-login.outputs.registry }}" | cut -d'.' -f4)
+        # Define the ECR repository and the image tag
+        ECR_REPOSITORY=old-roman-empire-quiz
+        IMAGE_TAG=latest
+        # Push the Docker image to ECR
+        docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
+
+    - name: Deploy to AWS ECS
+      run: |
+        # Get the account ID and the region from the login response
+        ACCOUNT_ID=$(echo "${{ steps.ecr-login.outputs.registry }}" | cut -d'/' -f1)
+        REGION=$(echo "${{ steps.ecr-login.outputs.registry }}" | cut -d'.' -f4)
+        # Define the ECR repository and the image tag
+        ECR_REPOSITORY=old-roman-empire-quiz
+        IMAGE_TAG=latest
+        # Update the ECS service with the new image
+        aws ecs update-service --cluster your-cluster-name --service your-service-name \
+        --force-new-deployment --region $REGION \
+        --image $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG

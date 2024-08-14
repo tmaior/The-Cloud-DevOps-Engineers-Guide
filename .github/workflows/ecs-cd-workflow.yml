@@ -51,7 +51,7 @@ jobs:
         # Push the Docker image to ECR
         docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
 
-    - name: Deploy to AWS ECS
+    - name: Update ECS task definition
       run: |
         # Get the account ID and the region from the login response
         ACCOUNT_ID=$(echo "${{ steps.ecr-login.outputs.registry }}" | cut -d'.' -f1)
@@ -59,7 +59,28 @@ jobs:
         # Define the ECR repository and the image tag
         ECR_REPOSITORY=old-roman-empire-quiz
         IMAGE_TAG=latest
-        # Update the ECS service with the new image
+        CONTAINER_NAME=old-roman-empire-quiz
+
+        # Create a new task definition file
+        TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition your-task-definition-name --region $REGION)
+        NEW_TASK_DEFINITION=$(echo $TASK_DEFINITION | jq --arg IMAGE "$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG" --arg NAME "$CONTAINER_NAME" '.taskDefinition | .containerDefinitions[] | select(.name == $NAME) | .image = $IMAGE | . | del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)')
+
+        # Register the new task definition
+        NEW_TASK_DEFINITION_ARN=$(aws ecs register-task-definition \
+          --family $(echo $TASK_DEFINITION | jq -r '.taskDefinition.family') \
+          --task-role-arn $(echo $TASK_DEFINITION | jq -r '.taskDefinition.taskRoleArn') \
+          --execution-role-arn $(echo $TASK_DEFINITION | jq -r '.taskDefinition.executionRoleArn') \
+          --network-mode $(echo $TASK_DEFINITION | jq -r '.taskDefinition.networkMode') \
+          --container-definitions "[$NEW_TASK_DEFINITION]" \
+          --requires-compatibilities $(echo $TASK_DEFINITION | jq -r '.taskDefinition.requiresCompatibilities[]') \
+          --cpu $(echo $TASK_DEFINITION | jq -r '.taskDefinition.cpu') \
+          --memory $(echo $TASK_DEFINITION | jq -r '.taskDefinition.memory') \
+          --region $REGION \
+          | jq -r '.taskDefinition.taskDefinitionArn')
+
+    - name: Deploy to AWS ECS
+      run: |
+        # Force a new deployment using the updated task definition
         aws ecs update-service --cluster your-cluster-name --service your-service-name \
         --force-new-deployment --region $REGION \
-        --image $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
+        --task-definition $NEW_TASK_DEFINITION_ARN

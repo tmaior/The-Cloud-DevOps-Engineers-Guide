@@ -7,7 +7,7 @@ pipeline {
         DOCKER_IMAGE = "${ECR_REPO}:latest"
         GIT_REPO = 'https://github.com/tmaior/The-Cloud-DevOps-Engineers-Guide.git'
         GIT_BRANCH = 'main'
-        PROJECT_PATH = 'The-Cloud-DevOps-Engineers-Guide/tasks-webapp/'
+        PROJECT_PATH = 'tasks-webapp/'
         SSH_KEY = '6517b91f-5a9f-4fe3-81ed-f478c433569c'
         EC2_USER = 'ubuntu'
         EC2_IP = '3.88.181.152'

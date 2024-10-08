@@ -6,7 +6,6 @@ pipeline {
         ECR_REPO = '654654369899.dkr.ecr.us-east-1.amazonaws.com/flask-tasksapp'
         REPO_URL = 'https://github.com/tmaior/The-Cloud-DevOps-Engineers-Guide.git'
         APP_PATH = 'The-Cloud-DevOps-Engineers-Guide/tasks-webapp/'
-        EC2_USER = 'ubuntu' // Adjust based on your instance user
         EC2_HOST = 'ec2-3-88-181-152.compute-1.amazonaws.com' // Replace with your EC2 instance public IP
     }
 
@@ -21,9 +20,12 @@ pipeline {
             steps {
                 script {
                     // Login to AWS ECR
-                    sh '''
-                    aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO
-                    '''
+                    withCredentials([string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
+                                     string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')]) {
+                        sh '''
+                        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO
+                        '''
+                    }
 
                     // Build Docker image
                     sh '''

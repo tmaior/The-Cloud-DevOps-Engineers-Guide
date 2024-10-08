@@ -11,6 +11,7 @@ pipeline {
         SSH_KEY = '6517b91f-5a9f-4fe3-81ed-f478c433569c'
         EC2_USER = 'ubuntu'
         EC2_IP = '3.88.181.152'
+        AWS_CREDENTIALS_ID = 'aws-credentials'  // ID of the AWS credentials in Jenkins
     }
 
     stages {
@@ -24,8 +25,10 @@ pipeline {
             steps {
                 dir("${PROJECT_PATH}") {
                     script {
-                        sh 'aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO'
-                        sh 'docker build -t $DOCKER_IMAGE .'
+                        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: "${AWS_CREDENTIALS_ID}"]]) {
+                            sh 'aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO'
+                            sh 'docker build -t $DOCKER_IMAGE .'
+                        }
                     }
                 }
             }

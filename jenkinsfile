@@ -23,12 +23,12 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                dir("${PROJECT_PATH}") {
+                dir("${PROJECT_PATH}") { // Change into the project path
                     script {
                         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: "${AWS_CREDENTIALS_ID}"]]) {
                             sh 'aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO'
-                            // Adjust the build command to point to the Dockerfile inside the tasks-webapp directory
-                            sh 'DOCKER_BUILDKIT=1 docker build -t $DOCKER_IMAGE -f Dockerfile .' // "." means current dir is already "tasks-webapp"
+                            // Specify the correct path to the Dockerfile
+                            sh 'DOCKER_BUILDKIT=1 docker build -t $DOCKER_IMAGE -f ./Dockerfile .'  // "." means the context is the current directory
                         }
                     }
                 }

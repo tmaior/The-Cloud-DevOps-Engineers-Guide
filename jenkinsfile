@@ -7,7 +7,7 @@ pipeline {
         DOCKER_IMAGE = "${ECR_REPO}:latest"
         GIT_REPO = 'https://github.com/tmaior/The-Cloud-DevOps-Engineers-Guide.git'
         GIT_BRANCH = 'main'
-        PROJECT_PATH = 'The-Cloud-DevOps-Engineers-Guide/tasks-webapp'
+        PROJECT_PATH = 'The-Cloud-DevOps-Engineers-Guide/tasks-webapp/'
         SSH_KEY = '6517b91f-5a9f-4fe3-81ed-f478c433569c'
         EC2_USER = 'ubuntu'
         EC2_IP = '3.88.181.152'
@@ -17,7 +17,6 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                // Clone the Git repository using specified branch
                 git branch: "${GIT_BRANCH}", url: "${GIT_REPO}"
             }
         }
@@ -27,11 +26,9 @@ pipeline {
                 dir("${PROJECT_PATH}") {
                     script {
                         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: "${AWS_CREDENTIALS_ID}"]]) {
-                            // Login to AWS ECR
                             sh 'aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO'
-                            
-                            // Build the Docker image using the Dockerfile in the correct directory
-                            sh 'DOCKER_BUILDKIT=1 docker build -t $DOCKER_IMAGE -f Dockerfile .'
+                            // Adjust the build command to point to the Dockerfile inside the tasks-webapp directory
+                            sh 'DOCKER_BUILDKIT=1 docker build -t $DOCKER_IMAGE -f Dockerfile .' // "." means current dir is already "tasks-webapp"
                         }
                     }
                 }
@@ -41,7 +38,6 @@ pipeline {
         stage('Push Docker Image to ECR') {
             steps {
                 script {
-                    // Push the Docker image to the ECR repository
                     sh 'docker push $DOCKER_IMAGE'
                 }
             }
@@ -51,7 +47,6 @@ pipeline {
             steps {
                 script {
                     withCredentials([sshUserPrivateKey(credentialsId: "${SSH_KEY}", keyFileVariable: 'SSH_KEYFILE')]) {
-                        // Deploy to EC2 by pulling the latest image and restarting the service
                         sh '''
                         ssh -o StrictHostKeyChecking=no -i $SSH_KEYFILE $EC2_USER@$EC2_IP << EOF
                         docker pull $DOCKER_IMAGE
@@ -68,7 +63,6 @@ pipeline {
 
     post {
         always {
-            // Clean up the workspace after the pipeline finishes
             cleanWs()
         }
     }

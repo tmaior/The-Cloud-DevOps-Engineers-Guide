@@ -21,14 +21,23 @@ pipeline {
             }
         }
 
+        stage('Check Directory Structure') {
+            steps {
+                script {
+                    sh 'ls -al'  // Check root directory
+                    sh 'ls -al ${PROJECT_PATH}'  // Check project path
+                }
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
-                dir("${PROJECT_PATH}") { // Change into the project path
+                dir("${PROJECT_PATH}") {
                     script {
                         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: "${AWS_CREDENTIALS_ID}"]]) {
                             sh 'aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO'
-                            // Specify the correct path to the Dockerfile
-                            sh 'DOCKER_BUILDKIT=1 docker build -t $DOCKER_IMAGE -f ./Dockerfile .'  // "." means the context is the current directory
+                            // Define full paths for Dockerfile and context
+                            sh 'DOCKER_BUILDKIT=1 docker build -t $DOCKER_IMAGE -f ${WORKSPACE}/${PROJECT_PATH}Dockerfile ${WORKSPACE}/${PROJECT_PATH}'
                         }
                     }
                 }

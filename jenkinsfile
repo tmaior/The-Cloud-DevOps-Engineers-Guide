@@ -53,7 +53,7 @@ pipeline {
                     withCredentials([sshUserPrivateKey(credentialsId: "${SSH_KEY}", keyFileVariable: 'SSH_KEYFILE')]) {
                         // Deploy to EC2 by pulling the latest image and restarting the service
                         sh '''
-                        ssh -o StrictHostKeyChecking=no -i $SSH_KEYFILE $EC2_USER@$EC2_IP << EOF
+                        ssh -t -o StrictHostKeyChecking=no -i $SSH_KEYFILE $EC2_USER@$EC2_IP << EOF
                         docker pull $DOCKER_IMAGE
                         docker stop flask_app || true
                         docker rm flask_app || true

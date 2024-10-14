@@ -16,7 +16,7 @@ module "ec2" {
   ]
 
   source        = "./modules/ec2"
-  key_name      = ""
+  key_name      = "vika-ripardo"
   instance_type = "t3.micro"
 
   network = {
@@ -59,7 +59,7 @@ module "cluster" {
     desired_instances = 1
     min_instances     = 1
     max_instances     = 2
-    key_name          = ""
+    key_name          = "vika-ripardo"
   }
 
   network = {

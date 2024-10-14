@@ -1,1 +1,1 @@
-cluster_name = "ecs-devops-book"
+cluster_name = "webapp-devops-book"

@@ -12,7 +12,7 @@ resource "aws_ecr_repository" "ecr_repository" {
 }
 
 resource "aws_ecs_cluster" "cluster" {  
-  name = "ecs-${var.cluster_name}"
+  name = "${var.cluster_name}-cluster"
 
   setting {
     name  = "containerInsights"
@@ -21,7 +21,8 @@ resource "aws_ecs_cluster" "cluster" {
 }
 
 resource "aws_ecs_capacity_provider" "capacity" {   
-  name = "${aws_ecs_cluster.cluster.name}-cp"
+  # Updated the name to avoid "ecs", "aws", and "fargate" prefixes
+  name = "${var.cluster_name}-cp"
 
   auto_scaling_group_provider {
     auto_scaling_group_arn         = aws_autoscaling_group.autoscaling_group.arn

@@ -25,7 +25,8 @@ pipeline {
             steps {
                 dir("${PROJECT_PATH}") {
                     script {
-                        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: "${AWS_CREDENTIALS_ID}"]]) {
+                        // Use withAWS for AWS credentials and region
+                        withAWS(credentials: "${AWS_CREDENTIALS_ID}", region: "${AWS_REGION}") {
                             // Login to AWS ECR
                             sh 'aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO'
                             
@@ -49,7 +50,8 @@ pipeline {
         stage('Deploy to ECS') {
             steps {
                 script {
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: "${AWS_CREDENTIALS_ID}"]]) {
+                    // Use withAWS for ECS service update with credentials and region
+                    withAWS(credentials: "${AWS_CREDENTIALS_ID}", region: "${AWS_REGION}") {
                         // Update ECS service with the new image
                         sh '''
                         aws ecs update-service --cluster $ECS_CLUSTER \

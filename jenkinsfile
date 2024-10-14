@@ -8,7 +8,7 @@ pipeline {
         GIT_REPO = 'https://github.com/tmaior/The-Cloud-DevOps-Engineers-Guide.git'
         GIT_BRANCH = 'main'
         PROJECT_PATH = 'tasks-webapp/'
-        AWS_CREDENTIALS_ID = 'ssh-key'
+        AWS_CREDENTIALS_ID = 'aws-credentials'
         ECS_CLUSTER = 'webapp-devops-book-cluster'
         ECS_SERVICE = 'flask-app'
     }

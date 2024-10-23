@@ -10,7 +10,7 @@ pipeline {
         PROJECT_PATH = 'tasks-webapp/'
         SSH_KEY = 'ec2-ssh'
         EC2_USER = 'ubuntu'
-        EC2_IP = 'ec2-3-88-181-152.compute-1.amazonaws.com'
+        EC2_IP = 'ec2-3-85-50-160.compute-1.amazonaws.com'
         AWS_CREDENTIALS_ID = 'aws-credentials'  // ID of the AWS credentials in Jenkins
     }
 

@@ -56,7 +56,7 @@ pipeline {
                         ssh -t -o StrictHostKeyChecking=no -i $SSH_KEYFILE $EC2_USER@$EC2_IP << 'EOF'
 
                         # Authenticate Docker to ECR
-                        aws ecr get-login-password --region $AWS_REGION | sudo docker login --username AWS --password-stdin $ECR_REPO
+                        aws ecr get-login-password --region '''${AWS_REGION}''' | sudo docker login --username AWS --password-stdin $ECR_REPO
                         
                         # Pull the Docker image from ECR
                         sudo docker pull $DOCKER_IMAGE

@@ -53,10 +53,7 @@ pipeline {
                     withCredentials([sshUserPrivateKey(credentialsId: "${SSH_KEY}", keyFileVariable: 'SSH_KEYFILE')]) {
                         // Deploy to EC2 by pulling the latest image and restarting the service
                         sh '''
-                        ssh -t -o StrictHostKeyChecking=no -i $SSH_KEYFILE $EC2_USER@$EC2_IP << EOF
-                        # Update the package list and install Docker if not already installed
-                        sudo apt update
-                        sudo apt install docker.io -y
+                        ssh -t -o StrictHostKeyChecking=no -i $SSH_KEYFILE $EC2_USER@$EC2_IP << 'EOF'
 
                         # Authenticate Docker to ECR
                         aws ecr get-login-password --region $AWS_REGION | sudo docker login --username AWS --password-stdin $ECR_REPO
@@ -64,9 +61,11 @@ pipeline {
                         # Pull the Docker image from ECR
                         sudo docker pull $DOCKER_IMAGE
                         
-                        # Stop and remove the existing container if it exists
-                        sudo docker stop flask_app || true
-                        sudo docker rm flask_app || true
+                        # Check if the existing container is running and stop/remove it
+                        if sudo docker ps -q -f name=flask_app; then
+                            sudo docker stop flask_app
+                            sudo docker rm flask_app
+                        fi
                         
                         # Run the new Docker container
                         sudo docker run -d --name flask_app -p 80:80 $DOCKER_IMAGE

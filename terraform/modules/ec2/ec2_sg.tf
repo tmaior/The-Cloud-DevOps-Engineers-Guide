@@ -104,14 +104,6 @@ resource "aws_instance" "app" {
     #!/bin/bash
     # Update packages
     sudo apt update
-	
-	# Install Jenkins
-    sudo wget -O /usr/share/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
-    echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/" | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
-    sudo apt update
-    sudo apt install jenkins -y
-    sudo systemctl start jenkins
-    sudo systemctl enable jenkins
 
     # Install Docker and BuildX
     sudo apt install docker.io -y
@@ -119,8 +111,7 @@ resource "aws_instance" "app" {
 	sudo systemctl start docker
     sudo systemctl enable docker
 	
-	# Add Jenkins and ubuntu users to the Docker group
-    sudo usermod -aG docker jenkins
+	# Add ubuntu user to the Docker group
     sudo usermod -aG docker ubuntu
     sudo systemctl restart jenkins
 

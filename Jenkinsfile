@@ -15,23 +15,19 @@ pipeline {
     }
 
     stages {
-        stage('Clone Repository') {
+        stage('Checkout') {
             steps {
-                // Clone the Git repository using specified branch
-                git branch: "${GIT_BRANCH}", url: "${GIT_REPO}"
+                git branch: "${env.GIT_BRANCH}", url: "${env.GIT_REPO}"
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                dir("${PROJECT_PATH}") {
+                dir("${env.PROJECT_PATH}") {
                     script {
-                        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: "${AWS_CREDENTIALS_ID}"]]) {
-                            // Login to AWS ECR
-                            sh 'aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO'
-                            
-                            // Build the Docker image using the Dockerfile in the correct directory
-                            sh 'DOCKER_BUILDKIT=1 docker build -t $DOCKER_IMAGE -f Dockerfile .'
+                        docker.withRegistry("https://${env.ECR_REPO}", "${env.AWS_CREDENTIALS_ID}") {
+                            sh '$(aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO)'
+                            sh 'docker build -t $DOCKER_IMAGE .'
                         }
                     }
                 }
@@ -41,7 +37,6 @@ pipeline {
         stage('Push Docker Image to ECR') {
             steps {
                 script {
-                    // Push the Docker image to the ECR repository
                     sh 'docker push $DOCKER_IMAGE'
                 }
             }
@@ -49,28 +44,16 @@ pipeline {
 
         stage('Deploy to EC2') {
             steps {
-                script {
-                    withCredentials([sshUserPrivateKey(credentialsId: "${SSH_KEY}", keyFileVariable: 'SSH_KEYFILE')]) {
-                        // Deploy to EC2 by pulling the latest image and restarting the service
-                        sh '''
-                        ssh -t -o StrictHostKeyChecking=no -i $SSH_KEYFILE $EC2_USER@$EC2_IP << 'EOF'
-
-                        # Authenticate Docker to ECR
-                        aws ecr get-login-password --region ${AWS_REGION} | sudo docker login --username AWS --password-stdin $ECR_REPO
-                        
-                        # Pull the Docker image from ECR
-                        sudo docker pull $DOCKER_IMAGE
-                        
-                        # Check if the existing container is running and stop/remove it
-                        if sudo docker ps -q -f name=flask_app; then
-                            sudo docker stop flask_app
-                            sudo docker rm flask_app
-                        fi
-                        
-                        # Run the new Docker container
-                        sudo docker run -d --name flask_app -p 80:80 $DOCKER_IMAGE
+                sshagent(credentials: ["${env.SSH_KEY}"]) {
+                    script {
+                        sh """
+                        ssh -o StrictHostKeyChecking=no ${env.EC2_USER}@${env.EC2_IP} << EOF
+                        sudo docker pull ${env.DOCKER_IMAGE}
+                        sudo docker stop webapp || true
+                        sudo docker rm webapp || true
+                        sudo docker run -d --name webapp -p 80:80 ${env.DOCKER_IMAGE}
                         EOF
-                        '''
+                        """
                     }
                 }
             }
@@ -79,7 +62,6 @@ pipeline {
 
     post {
         always {
-            // Clean up the workspace after the pipeline finishes
             cleanWs()
         }
     }

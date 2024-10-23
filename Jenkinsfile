@@ -8,7 +8,7 @@ pipeline {
         GIT_REPO = 'https://github.com/tmaior/The-Cloud-DevOps-Engineers-Guide.git'
         GIT_BRANCH = 'main'
         PROJECT_PATH = 'tasks-webapp/'
-        SSH_KEY = 'ec2-ssh'
+        SSH_KEY = 'ec2-ssh'  // ID of the SSH key credentials in Jenkins
         EC2_USER = 'ubuntu'
         EC2_IP = 'ec2-54-196-219-126.compute-1.amazonaws.com'
         AWS_CREDENTIALS_ID = 'aws-credentials'  // ID of the AWS credentials in Jenkins
@@ -54,18 +54,22 @@ pipeline {
                         // Deploy to EC2 by pulling the latest image and restarting the service
                         sh '''
                         ssh -t -o StrictHostKeyChecking=no -i $SSH_KEYFILE $EC2_USER@$EC2_IP << EOF
+                        # Update the package list and install Docker if not already installed
+                        sudo apt update
+                        sudo apt install docker.io -y
+
                         # Authenticate Docker to ECR
-                        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO
+                        aws ecr get-login-password --region $AWS_REGION | sudo docker login --username AWS --password-stdin $ECR_REPO
                         
                         # Pull the Docker image from ECR
-                        docker pull $DOCKER_IMAGE
+                        sudo docker pull $DOCKER_IMAGE
                         
                         # Stop and remove the existing container if it exists
-                        docker stop flask_app || true
-                        docker rm flask_app || true
+                        sudo docker stop flask_app || true
+                        sudo docker rm flask_app || true
                         
                         # Run the new Docker container
-                        docker run -d --name flask_app -p 80:80 $DOCKER_IMAGE
+                        sudo docker run -d --name flask_app -p 80:80 $DOCKER_IMAGE
                         EOF
                         '''
                     }

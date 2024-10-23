@@ -10,9 +10,6 @@ variable "vpc_cidr_block" {
   type        = string
   default     = "10.0.0.0/16"
 }
-variable "cluster_name" {
-  type        = string
-}
 
 # VPC Public Subnets
 variable "vpc_public_subnets" {
@@ -58,5 +55,4 @@ variable "environment" {
 # Owners
 variable "owners" {
   type        = string
-  default     = "ezops"
 }

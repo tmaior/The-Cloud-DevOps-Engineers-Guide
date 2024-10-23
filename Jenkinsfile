@@ -3,14 +3,15 @@ pipeline {
 
     environment {
         AWS_REGION = 'us-east-1'
-        ECR_REPO = '654654369899.dkr.ecr.us-east-1.amazonaws.com/flask-web-app'
+        ECR_REPO = '654654369899.dkr.ecr.us-east-1.amazonaws.com/vika-ripardo-dev-ecr-repo'
         DOCKER_IMAGE = "${ECR_REPO}:latest"
         GIT_REPO = 'https://github.com/tmaior/The-Cloud-DevOps-Engineers-Guide.git'
         GIT_BRANCH = 'main'
         PROJECT_PATH = 'tasks-webapp/'
-        AWS_CREDENTIALS_ID = 'aws-credentials'
-        ECS_CLUSTER = 'webapp-devops-book-cluster'
-        ECS_SERVICE = 'flask-app'
+        SSH_KEY = 'ec2-ssh'
+        EC2_USER = 'ubuntu'
+        EC2_IP = 'ec2-3-88-181-152.compute-1.amazonaws.com'
+        AWS_CREDENTIALS_ID = 'aws-credentials'  // ID of the AWS credentials in Jenkins
     }
 
     stages {
@@ -46,16 +47,26 @@ pipeline {
             }
         }
 
-        stage('Deploy to ECS') {
+        stage('Deploy to EC2') {
             steps {
                 script {
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: "${AWS_CREDENTIALS_ID}"]]) {
-                        // Update ECS service with the new image
+                    withCredentials([sshUserPrivateKey(credentialsId: "${SSH_KEY}", keyFileVariable: 'SSH_KEYFILE')]) {
+                        // Deploy to EC2 by pulling the latest image and restarting the service
                         sh '''
-                        aws ecs update-service --cluster $ECS_CLUSTER \
-                        --service $ECS_SERVICE \
-                        --force-new-deployment \
-                        --region $AWS_REGION
+                        ssh -t -o StrictHostKeyChecking=no -i $SSH_KEYFILE $EC2_USER@$EC2_IP << EOF
+                        # Authenticate Docker to ECR
+                        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO
+                        
+                        # Pull the Docker image from ECR
+                        docker pull $DOCKER_IMAGE
+                        
+                        # Stop and remove the existing container if it exists
+                        docker stop flask_app || true
+                        docker rm flask_app || true
+                        
+                        # Run the new Docker container
+                        docker run -d --name flask_app -p 80:80 $DOCKER_IMAGE
+                        EOF
                         '''
                     }
                 }
